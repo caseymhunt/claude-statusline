@@ -11,9 +11,9 @@ extract_section_num() {
   echo "$input" | grep -o "\"$1\":{[^}]*}" | grep -o "\"$2\":[0-9.]*" | sed 's/.*://'
 }
 
-model=$(extract "display_name")
-effort=$(extract "level")
-cwd=$(extract "cwd")
+model=$(extract "display_name"); model=${model:-"Claude Code"}
+effort=$(extract "level"); effort=${effort:-"—"}
+cwd=$(extract "cwd"); cwd=${cwd:-"$HOME"}
 transcript=$(extract "transcript_path")
 used_pct=$(extract_num "used_percentage")
 remaining_pct=$(extract_num "remaining_percentage")
@@ -116,15 +116,19 @@ PYEOF
 )
 
 # Compute turns remaining estimates
+fiveh_used=${fiveh_used:-0}
+sevenday_used=${sevenday_used:-0}
+fiveh_resets=${fiveh_resets:-0}
+sevenday_resets=${sevenday_resets:-0}
 fiveh_rem=$((100 - ${fiveh_used%%.*}))
 sevenday_rem=$((100 - ${sevenday_used%%.*}))
 
 fiveh_turns_rem="?"
 sevenday_turns_rem="?"
-if [ -n "$turns_5h" ] && [ "$turns_5h" -gt 0 ] && [ "${fiveh_used%%.*}" -gt 0 ] 2>/dev/null; then
+if [ -n "$turns_5h" ] && [ "$turns_5h" -gt 0 ] 2>/dev/null && [ "${fiveh_used%%.*}" -gt 0 ] 2>/dev/null; then
   fiveh_turns_rem=$(python3 -c "print(int(($fiveh_rem/$fiveh_used)*$turns_5h))" 2>/dev/null)
 fi
-if [ -n "$turns_7d" ] && [ "$turns_7d" -gt 0 ] && [ "${sevenday_used%%.*}" -gt 0 ] 2>/dev/null; then
+if [ -n "$turns_7d" ] && [ "$turns_7d" -gt 0 ] 2>/dev/null && [ "${sevenday_used%%.*}" -gt 0 ] 2>/dev/null; then
   sevenday_turns_rem=$(python3 -c "print(int(($sevenday_rem/$sevenday_used)*$turns_7d))" 2>/dev/null)
 fi
 
@@ -133,19 +137,27 @@ now=$(date +%s)
 ctx_rem=${remaining_pct%%.*}; ctx_rem=${ctx_rem:-100}
 
 fiveh_secs_left=$(( ${fiveh_resets%%.*} - now ))
-fiveh_mins_left=$(( fiveh_secs_left / 60 ))
-fiveh_hrs=$(( fiveh_mins_left / 60 ))
-fiveh_mins=$(( fiveh_mins_left % 60 ))
-[ "$fiveh_hrs" -gt 0 ] 2>/dev/null \
-  && fiveh_time="${fiveh_hrs}h${fiveh_mins}m" \
-  || fiveh_time="${fiveh_mins_left}m"
+if [ "$fiveh_secs_left" -le 0 ] 2>/dev/null; then
+  fiveh_time="—"
+else
+  fiveh_mins_left=$(( fiveh_secs_left / 60 ))
+  fiveh_hrs=$(( fiveh_mins_left / 60 ))
+  fiveh_mins=$(( fiveh_mins_left % 60 ))
+  [ "$fiveh_hrs" -gt 0 ] 2>/dev/null \
+    && fiveh_time="${fiveh_hrs}h${fiveh_mins}m" \
+    || fiveh_time="${fiveh_mins_left}m"
+fi
 
 sevenday_secs_left=$(( ${sevenday_resets%%.*} - now ))
-sevenday_days_left=$(( sevenday_secs_left / 86400 ))
-if [ "$sevenday_days_left" -lt 2 ] 2>/dev/null; then
-  sevenday_time_label="${DIM} $(( sevenday_secs_left / 3600 ))h${RESET}"
+if [ "$sevenday_secs_left" -le 0 ] 2>/dev/null; then
+  sevenday_time_label="${DIM} —${RESET}"
 else
-  sevenday_time_label="${DIM} ${sevenday_days_left}d${RESET}"
+  sevenday_days_left=$(( sevenday_secs_left / 86400 ))
+  if [ "$sevenday_days_left" -lt 2 ] 2>/dev/null; then
+    sevenday_time_label="${DIM} $(( sevenday_secs_left / 3600 ))h${RESET}"
+  else
+    sevenday_time_label="${DIM} ${sevenday_days_left}d${RESET}"
+  fi
 fi
 
 ctx_color=$(color_pct_remaining "$ctx_rem")

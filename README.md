@@ -10,7 +10,7 @@ Sonnet 4.6 · medium  ┃  ctx ●●●●●●●●●○ · 5h ●●●●
 
 Four zones (separated by `┃`):
 1. **Model** — display name and effort level
-2. **Metrics** — 10-dot bars for context window, 5-hour limit, and 7-day limit remaining; time-to-reset after each limit bar
+2. **Metrics** — 10-dot bars for context window, 5-hour limit, and 7-day limit remaining; time-to-reset after each limit bar. Each bar has 5% resolution: `●` = 10%, `◐` = 5%, `○` = 0%
 3. **Turn stats** — last turn token count, estimated turns remaining within each rate-limit window
 4. **Location** — current directory name, git branch in brackets
 
@@ -19,6 +19,15 @@ Colors reflect **remaining** capacity: green >50%, yellow 20–50%, red ≤20%. 
 ## Install
 
 **Dependencies:** bash, grep, sed, git, date, python3 — no other tools required.
+
+```sh
+bash install.sh
+```
+
+Then restart Claude Code.
+
+<details>
+<summary>Manual install</summary>
 
 1. Copy the script to `~/.claude/`:
 
@@ -40,6 +49,8 @@ Colors reflect **remaining** capacity: green >50%, yellow 20–50%, red ≤20%. 
    The full snippet is in `settings-snippet.json`.
 
 3. Restart Claude Code.
+
+</details>
 
 ## Notes
 
