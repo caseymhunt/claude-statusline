@@ -56,12 +56,16 @@ color_pct_remaining() {
 dot_bar() {
   local pct=${1%%.*}; pct=${pct:-0}
   local color=$2
-  local filled=$(( pct / 10 ))
+  local half_units=$(( pct / 5 ))
+  local full_dots=$(( half_units / 2 ))
+  local has_half=$(( half_units % 2 ))
   local bar=""
   local i=0
   while [ $i -lt 10 ]; do
-    if [ $i -lt $filled ]; then
+    if [ $i -lt $full_dots ]; then
       bar+="${color}●${RESET}"
+    elif [ $i -eq $full_dots ] && [ $has_half -eq 1 ]; then
+      bar+="${color}◐${RESET}"
     else
       bar+="${DIM}○${RESET}"
     fi
