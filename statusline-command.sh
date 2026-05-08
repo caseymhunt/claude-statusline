@@ -85,9 +85,11 @@ five_h_ago = now - 5 * 3600
 seven_d_ago = now - 7 * 24 * 3600
 turns_5h = 0
 turns_7d = 0
+ok = False
 
 try:
     with open(transcript_path) as f:
+        ok = True
         for line in f:
             try:
                 entry = json.loads(line)
@@ -106,7 +108,10 @@ try:
 except:
     pass
 
-print(turns_5h, turns_7d)
+if ok:
+    print(turns_5h, turns_7d)
+else:
+    print("? ?")
 PYEOF
 )
 
@@ -135,7 +140,13 @@ fiveh_mins=$(( fiveh_mins_left % 60 ))
   && fiveh_time="${fiveh_hrs}h${fiveh_mins}m" \
   || fiveh_time="${fiveh_mins_left}m"
 
-sevenday_days_left=$(( (${sevenday_resets%%.*} - now) / 86400 ))
+sevenday_secs_left=$(( ${sevenday_resets%%.*} - now ))
+sevenday_days_left=$(( sevenday_secs_left / 86400 ))
+if [ "$sevenday_days_left" -lt 2 ] 2>/dev/null; then
+  sevenday_time_label="${DIM} $(( sevenday_secs_left / 3600 ))h${RESET}"
+else
+  sevenday_time_label="${DIM} ${sevenday_days_left}d${RESET}"
+fi
 
 ctx_color=$(color_pct_remaining "$ctx_rem")
 fiveh_color=$(color_pct_remaining "$fiveh_rem")
@@ -158,7 +169,7 @@ out+="${CYAN}${BOLD}${model}${RESET}${DIM} · ${effort}${RESET}"
 out+="${ZONE}"
 out+="${DIM}ctx ${RESET}${ctx_bar}"
 out+="${SEP}${DIM}5h ${RESET}${fiveh_bar}${DIM} ${fiveh_time}${RESET}"
-out+="${SEP}${DIM}7d ${RESET}${sevenday_bar}${DIM} ${sevenday_days_left}d${RESET}"
+out+="${SEP}${DIM}7d ${RESET}${sevenday_bar}${sevenday_time_label}"
 
 # Zone 3: turn stats
 out+="${ZONE}"

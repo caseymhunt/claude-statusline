@@ -2,6 +2,8 @@
 
 A Claude Code status bar showing model, context/rate-limit usage, turn stats, and current location.
 
+![claude-statusline screenshot](screenshot.png)
+
 ```
 Sonnet 4.6 · medium  ┃  ctx ●●●●●●●●●○ · 5h ●●●●●●○○○○ 1h5m · 7d ●●●●●○○○○○ 3d  ┃  last 34.2k · ~5h 120t · ~7d 172t  ┃  claude-statusline [main]
 ```
@@ -12,7 +14,7 @@ Four zones (separated by `┃`):
 3. **Turn stats** — last turn token count, estimated turns remaining within each rate-limit window
 4. **Location** — current directory name, git branch in brackets
 
-Colors reflect **remaining** capacity: green >50%, yellow 20–50%, red ≤20%. A flashing `▐ ⚠ 5H LIMIT CRITICAL ▌` badge appears when the 5-hour limit drops to ≤5% remaining.
+Colors reflect **remaining** capacity: green >50%, yellow 20–50%, red ≤20%. A reverse-video red `▐ ⚠ 5H LIMIT CRITICAL ▌` badge appears when the 5-hour limit drops to ≤5% remaining.
 
 ## Install
 
